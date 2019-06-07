@@ -1,0 +1,234 @@
+
+
+-- tables
+-- Table: GR21_ALQUILER
+CREATE TABLE GR21_ALQUILER (
+    id_alquiler int  NOT NULL,
+    id_cliente int  NOT NULL,
+    fecha_desde date  NOT NULL,
+    fecha_hasta date  NULL,
+    importe_dia decimal(10,2)  NOT NULL,
+    CONSTRAINT PK_GR21_ALQUILER PRIMARY KEY (id_alquiler)
+);
+
+-- Table: GR21_ALQUILER_POSICIONES
+CREATE TABLE GR21_ALQUILER_POSICIONES (
+    id_alquiler int  NOT NULL,
+    nro_posicion int  NOT NULL,
+    nro_estanteria int  NOT NULL,
+    nro_fila int  NOT NULL,
+    estado boolean  NOT NULL,
+    CONSTRAINT PK_GR21_ALQUILER_POSICIONES PRIMARY KEY (id_alquiler,nro_posicion,nro_estanteria,nro_fila)
+);
+
+-- Table: GR21_CLIENTE
+CREATE TABLE GR21_CLIENTE (
+    cuit_cuil int  NOT NULL,
+    apellido varchar(60)  NOT NULL,
+    nombre varchar(40)  NOT NULL,
+    fecha_alta date  NOT NULL,
+    CONSTRAINT PK_GR21_CLIENTE PRIMARY KEY (cuit_cuil)
+);
+
+-- Table: GR21_ESTANTERIA
+CREATE TABLE GR21_ESTANTERIA (
+    nro_estanteria int  NOT NULL,
+    nombre_estanteria varchar(80)  NOT NULL,
+    CONSTRAINT PK_GR21_ESTANTERIA PRIMARY KEY (nro_estanteria)
+);
+
+-- Table: GR21_FILA
+CREATE TABLE GR21_FILA (
+    nro_estanteria int  NOT NULL,
+    nro_fila int  NOT NULL,
+    nombre_fila varchar(80)  NOT NULL,
+    peso_max_kg decimal(10,2)  NOT NULL,
+    CONSTRAINT PK_GR21_FILA PRIMARY KEY (nro_estanteria,nro_fila)
+);
+
+-- Table: GR21_MOVIMIENTO
+CREATE TABLE GR21_MOVIMIENTO (
+    id_movimiento int  NOT NULL,
+    fecha timestamp  NOT NULL,
+    responsable varchar(80)  NOT NULL,
+    tipo char(1)  NOT NULL,
+    CONSTRAINT PK_GR21_MOVIMIENTO PRIMARY KEY (id_movimiento)
+);
+
+-- Table: GR21_MOV_ENTRADA
+CREATE TABLE GR21_MOV_ENTRADA (
+    id_movimiento int  NOT NULL,
+    transporte varchar(80)  NOT NULL,
+    guia varchar(80)  NOT NULL,
+    cod_pallet varchar(20)  NOT NULL,
+    id_alquiler int  NOT NULL,
+    nro_posicion int  NOT NULL,
+    nro_estanteria int  NOT NULL,
+    nro_fila int  NOT NULL,
+    CONSTRAINT PK_GR21_MOV_ENTRADA PRIMARY KEY (id_movimiento)
+);
+
+-- Table: GR21_MOV_INTERNO
+CREATE TABLE GR21_MOV_INTERNO (
+    id_movimiento int  NOT NULL,
+    razon varchar(200)  NULL,
+    nro_posicion int  NOT NULL,
+    nro_estanteria int  NOT NULL,
+    nro_fila int  NOT NULL,
+    CONSTRAINT PK_GR21_MOV_INTERNO PRIMARY KEY (id_movimiento)
+);
+
+-- Table: GR21_MOV_SALIDA
+CREATE TABLE GR21_MOV_SALIDA (
+    id_movimiento int  NOT NULL,
+    transporte varchar(80)  NOT NULL,
+    guia varchar(80)  NOT NULL,
+    CONSTRAINT PK_GR21_MOV_SALIDA PRIMARY KEY (id_movimiento)
+);
+
+-- Table: GR21_PALLET
+CREATE TABLE GR21_PALLET (
+    cod_pallet varchar(20)  NOT NULL,
+    descripcion varchar(200)  NOT NULL,
+    peso decimal(10,2)  NOT NULL,
+    CONSTRAINT PK_GR21_PALLET PRIMARY KEY (cod_pallet)
+);
+
+-- Table: GR21_POSICION
+CREATE TABLE GR21_POSICION (
+    nro_posicion int  NOT NULL,
+    nro_estanteria int  NOT NULL,
+    nro_fila int  NOT NULL,
+    tipo varchar(40)  NOT NULL,
+    CONSTRAINT PK_GR21_POSICION PRIMARY KEY (nro_posicion,nro_estanteria,nro_fila)
+);
+
+-- foreign keys
+-- Reference: FK_GR21_ALQUILER_CLIENTE (table: GR21_ALQUILER)
+ALTER TABLE GR21_ALQUILER ADD CONSTRAINT FK_GR21_ALQUILER_CLIENTE
+    FOREIGN KEY (id_cliente)
+    REFERENCES GR21_CLIENTE (cuit_cuil)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_ALQUILER_POSICIONES_ALQUILER (table: GR21_ALQUILER_POSICIONES)
+ALTER TABLE GR21_ALQUILER_POSICIONES ADD CONSTRAINT FK_GR21_ALQUILER_POSICIONES_ALQUILER
+    FOREIGN KEY (id_alquiler)
+    REFERENCES GR21_ALQUILER (id_alquiler)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_ALQUILER_POSICIONES_POSICION (table: GR21_ALQUILER_POSICIONES)
+ALTER TABLE GR21_ALQUILER_POSICIONES ADD CONSTRAINT FK_GR21_ALQUILER_POSICIONES_POSICION
+    FOREIGN KEY (nro_posicion, nro_estanteria, nro_fila)
+    REFERENCES GR21_POSICION (nro_posicion, nro_estanteria, nro_fila)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_FILA_ESTANTERIA (table: GR21_FILA)
+ALTER TABLE GR21_FILA ADD CONSTRAINT FK_GR21_FILA_ESTANTERIA
+    FOREIGN KEY (nro_estanteria)
+    REFERENCES GR21_ESTANTERIA (nro_estanteria)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_MOV_ENTRADA_ALQUILER_POSICIONES (table: GR21_MOV_ENTRADA)
+ALTER TABLE GR21_MOV_ENTRADA ADD CONSTRAINT FK_GR21_MOV_ENTRADA_ALQUILER_POSICIONES
+    FOREIGN KEY (id_alquiler, nro_posicion, nro_estanteria, nro_fila)
+    REFERENCES GR21_ALQUILER_POSICIONES (id_alquiler, nro_posicion, nro_estanteria, nro_fila)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_MOV_ENTRADA_MOVIMIENTO (table: GR21_MOV_ENTRADA)
+ALTER TABLE GR21_MOV_ENTRADA ADD CONSTRAINT FK_GR21_MOV_ENTRADA_MOVIMIENTO
+    FOREIGN KEY (id_movimiento)
+    REFERENCES GR21_MOVIMIENTO (id_movimiento)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_MOV_ENTRADA_PALLET (table: GR21_MOV_ENTRADA)
+ALTER TABLE GR21_MOV_ENTRADA ADD CONSTRAINT FK_GR21_MOV_ENTRADA_PALLET
+    FOREIGN KEY (cod_pallet)
+    REFERENCES GR21_PALLET (cod_pallet)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_MOV_INTERNO_MOVIMIENTO (table: GR21_MOV_INTERNO)
+ALTER TABLE GR21_MOV_INTERNO ADD CONSTRAINT FK_GR21_MOV_INTERNO_MOVIMIENTO
+    FOREIGN KEY (id_movimiento)
+    REFERENCES GR21_MOVIMIENTO (id_movimiento)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_MOV_INTERNO_POSICION (table: GR21_MOV_INTERNO)
+ALTER TABLE GR21_MOV_INTERNO ADD CONSTRAINT FK_GR21_MOV_INTERNO_POSICION
+    FOREIGN KEY (nro_posicion, nro_estanteria, nro_fila)
+    REFERENCES GR21_POSICION (nro_posicion, nro_estanteria, nro_fila)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_MOV_SALIDA_MOVIMIENTO (table: GR21_MOV_SALIDA)
+ALTER TABLE GR21_MOV_SALIDA ADD CONSTRAINT FK_GR21_MOV_SALIDA_MOVIMIENTO
+    FOREIGN KEY (id_movimiento)
+    REFERENCES GR21_MOVIMIENTO (id_movimiento)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: FK_GR21_POSICION_FILA (table: GR21_POSICION)
+ALTER TABLE GR21_POSICION ADD CONSTRAINT FK_GR21_POSICION_FILA
+    FOREIGN KEY (nro_estanteria, nro_fila)
+    REFERENCES GR21_FILA (nro_estanteria, nro_fila)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+
+
+ALTER TABLE  GR21_POSICION 
+ADD COLUMN id_posicion SERIAL NOT NULL;
+
+ALTER TABLE  GR21_POSICION 
+ALTER COLUMN id_posicion SET DEFAULT nextval('GR21_POSICION_id_posicion_seq'::regclass)
+;
+
+
+ALTER TABLE  GR21_FILA
+ADD COLUMN alto NUMERIC (10,2) NOT NULL;
+;
+
+ALTER TABLE GR21_MOV_SALIDA
+ADD COLUMN id_movimiento_ent integer NOT NULL ;
+
+ALTER TABLE GR21_MOV_SALIDA ADD CONSTRAINT FK_GR21_MOV_SALIDA_MOV_ENTRADA 
+FOREIGN KEY(id_movimiento_ent)
+REFERENCES GR21_MOV_ENTRADA(id_movimiento)
+NOT DEFERRABLE 
+INITIALLY IMMEDIATE
+;  
+
+ALTER TABLE GR21_MOV_INTERNO
+ADD COLUMN id_movimiento_ant integer NULL;
+
+ALTER TABLE GR21_MOV_INTERNO
+ADD COLUMN id_movimiento_ent integer NOT NULL;
+
+ALTER TABLE GR21_MOV_INTERNO
+ADD CONSTRAINT FK_GR21_MOV_INTERNO_MOV_ENTRADA FOREIGN KEY(id_movimiento_ent)
+REFERENCES GR21_MOV_ENTRADA(id_movimiento)
+;
+ALTER TABLE GR21_MOV_INTERNO
+ADD CONSTRAINT FK_GR21_MOV_INTERNO_MOV_INTERNO FOREIGN KEY(id_movimiento_ant)
+REFERENCES GR21_MOV_INTERNO(id_movimiento)
+;  
+
+-- End of file.
